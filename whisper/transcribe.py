@@ -178,7 +178,7 @@ def transcribe(
             segment = pad_or_trim(mel[:, :, seek:], N_FRAMES).to(model.device).to(dtype)
             segment_duration = segment.shape[-1] * HOP_LENGTH / SAMPLE_RATE
 
-            decode_options["prompt"] = all_tokens[prompt_reset_since:]
+            decode_options["prompt"] = initial_prompt
             result = decode_with_fallback(segment)[0]
             tokens = torch.tensor(result.tokens)
 
@@ -215,7 +215,7 @@ def transcribe(
                 last_timestamp_position = (
                     tokens[last_slice - 1].item() - tokenizer.timestamp_begin
                 )
-                seek += last_timestamp_position * input_stride
+                # seek += last_timestamp_position * input_stride
                 all_tokens.extend(tokens[: last_slice + 1].tolist())
             else:
                 duration = segment_duration
@@ -233,8 +233,8 @@ def transcribe(
                     result=result,
                 )
 
-                seek += segment.shape[-1]
                 all_tokens.extend(tokens.tolist())
+            seek += segment.shape[-1]
 
             if not condition_on_previous_text or result.temperature > 0.5:
                 # do not feed the prompt tokens if a high temperature was used
