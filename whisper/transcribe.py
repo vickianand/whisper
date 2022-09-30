@@ -239,6 +239,7 @@ def transcribe(
             # update progress bar
             pbar.update(min(num_frames, seek) - previous_seek_value)
             previous_seek_value = seek
+            print("-"*100)
 
     return dict(text=tokenizer.decode(all_tokens[len(initial_prompt):]), segments=all_segments, language=language)
 
