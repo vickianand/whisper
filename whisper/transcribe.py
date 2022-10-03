@@ -208,6 +208,18 @@ def transcribe(
                         result=result,
                     )
                     last_slice = current_slice
+                # add the remaining tokens
+                sliced_tokens = tokens[last_slice:]
+                if len(sliced_tokens) > 0:
+                    start_timestamp_position = (
+                        sliced_tokens[0].item() - tokenizer.timestamp_begin
+                    )
+                    add_segment(
+                        start=timestamp_offset + start_timestamp_position * time_precision,
+                        end=timestamp_offset + segment_duration,
+                        text_tokens=sliced_tokens,
+                        result=result,
+                    )
                 last_timestamp_position = (
                     tokens[last_slice - 1].item() - tokenizer.timestamp_begin
                 )
