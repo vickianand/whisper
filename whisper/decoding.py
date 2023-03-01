@@ -501,7 +501,7 @@ class DecodingTask:
         self.logit_filters = []
         if self.options.encourage_porbability_boost:
             self.logit_filters.append(
-                EncourageTokens(self._get_suppress_tokens(), prob_boost = self.options.encourage_porbability_boost)
+                EncourageTokens(self._get_encourage_tokens(), prob_boost = self.options.encourage_porbability_boost)
             )
         if self.options.suppress_blank:
             self.logit_filters.append(SuppressBlank(self.tokenizer, self.sample_begin))
