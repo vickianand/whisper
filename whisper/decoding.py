@@ -99,6 +99,9 @@ class DecodingOptions:
     # implementation details
     fp16: bool = True  # use fp16 for most of the calculation
 
+    # additional probability to boost sampling of some of the tokens
+    encourage_porbability_boost: Optional[float] = None
+
 
 @dataclass(frozen=True)
 class DecodingResult:
@@ -396,6 +399,14 @@ class SuppressTokens(LogitFilter):
     def apply(self, logits: Tensor, tokens: Tensor):
         logits[:, self.suppress_tokens] = -np.inf
 
+class EncourageTokens(LogitFilter):
+    def __init__(self, encourage_tokens: Sequence[int], prob_boost: float = 0.1):
+       self.encourage_tokens = list(encourage_tokens)
+       self.prob_boost = prob_boost
+
+    def apply(self, logits: Tensor, tokens: Tensor):
+        logits[:, self.encourage_tokens] += self.prob_boost
+
 
 class ApplyTimestampRules(LogitFilter):
     def __init__(
@@ -488,6 +499,10 @@ class DecodingTask:
 
         # logit filters: applies various rules to suppress or penalize certain tokens
         self.logit_filters = []
+        if self.options.encourage_porbability_boost:
+            self.logit_filters.append(
+                EncourageTokens(self._get_suppress_tokens(), prob_boost = self.options.encourage_porbability_boost)
+            )
         if self.options.suppress_blank:
             self.logit_filters.append(SuppressBlank(self.tokenizer, self.sample_begin))
         if self.options.suppress_tokens:
@@ -556,6 +571,28 @@ class DecodingTask:
             suppress_tokens.append(self.tokenizer.no_speech)
 
         return tuple(sorted(set(suppress_tokens)))
+
+    def _get_encourage_tokens(self) -> Tuple[int]:
+        filler_word_tokens = {
+            "um": 449,
+            " um": 1105,
+            " Um": 3301,
+            " Umm": 18918,
+            " umm": 28397,
+            "Um": 40937,
+            " uh": 2232,
+            "uh": 3232,
+            " Uh": 4019,
+            "Uh": 27727,
+            " uhh": 29256,
+            " Uhh": 29365,
+            " Uhm": 32287,
+            " Hmm": 8239,
+            "hmm": 10250,
+            "Hmm": 40527,
+        }
+        encourage_tokens = list(filler_word_tokens.values())
+        return tuple(sorted(set(encourage_tokens)))
 
     def _get_audio_features(self, mel: Tensor):
         if self.options.fp16:
