@@ -100,7 +100,7 @@ class DecodingOptions:
     fp16: bool = True  # use fp16 for most of the calculation
 
     # additional probability to boost sampling of some of the tokens
-    encourage_porbability_boost: Optional[float] = None
+    ecouraged_tokens_logit_boost: Optional[float] = None
 
 
 @dataclass(frozen=True)
@@ -499,9 +499,9 @@ class DecodingTask:
 
         # logit filters: applies various rules to suppress or penalize certain tokens
         self.logit_filters = []
-        if self.options.encourage_porbability_boost:
+        if self.options.ecouraged_tokens_logit_boost:
             self.logit_filters.append(
-                EncourageTokens(self._get_encourage_tokens(), prob_boost = self.options.encourage_porbability_boost)
+                EncourageTokens(self._get_encourage_tokens(), prob_boost = self.options.ecouraged_tokens_logit_boost)
             )
         if self.options.suppress_blank:
             self.logit_filters.append(SuppressBlank(self.tokenizer, self.sample_begin))
