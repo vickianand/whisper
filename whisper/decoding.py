@@ -574,22 +574,19 @@ class DecodingTask:
 
     def _get_encourage_tokens(self) -> Tuple[int]:
         filler_word_tokens = {
-            "um": 449,
             " um": 1105,
             " Um": 3301,
-            " Umm": 18918,
-            " umm": 28397,
-            "Um": 40937,
             " uh": 2232,
-            "uh": 3232,
             " Uh": 4019,
-            "Uh": 27727,
-            " uhh": 29256,
-            " Uhh": 29365,
-            " Uhm": 32287,
-            " Hmm": 8239,
-            "hmm": 10250,
-            "Hmm": 40527,
+            # " uhh": 29256,
+            # " Uhh": 29365,
+            # " Uhm": 32287,
+            # " uhm": 35007,
+            # " Hmm": 8239,
+            # " hmm": 16478,
+            # "Hmm": 40527,
+            # " mm": 11169,
+            # " Mm": 8266,
         }
         encourage_tokens = list(filler_word_tokens.values())
         return tuple(sorted(set(encourage_tokens)))
